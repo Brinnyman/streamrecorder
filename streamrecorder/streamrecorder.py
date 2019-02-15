@@ -1,5 +1,10 @@
 import os
 import configparser
+import datetime
+from twitch.api import TwitchAPI
+
+
+twitch_api = TwitchAPI()
 
 
 class StreamRecorder:
@@ -16,5 +21,13 @@ class StreamRecorder:
         self.twitch_client_id = config['TWITCH']['TWITCH_CLIENT_ID']
         self.vod_id = '380587447'
 
+    def twitch_stream_info(self):
+        print(twitch_api.get_stream_information(self.name, self.twitch_client_id))
+        print(twitch_api.get_stream_status(self.name, self.twitch_client_id))
+
     def run(self):
         print('Starting streamrecorder')
+        # TODO: cli parameters, as part of the helper module
+        # TODO: based on cli parameters execute functions
+        
+        self.twitch_stream_info()
