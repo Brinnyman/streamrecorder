@@ -24,6 +24,7 @@ class StreamRecorder:
         self.streamlink_commands = config['STREAMLINK']['STREAMLINK_COMMANDS']
         self.ffmpeg_path = config['FFMPEG']['FFMPEG_PATH']
         self.twitch_client_id = config['TWITCH']['TWITCH_CLIENT_ID']
+        self.type = ''
         self.vod_id = '380587447'
 
     def record_twitch(self, recording_path, name, twitch_client_id, streamlink_quality, streamlink_commands):
