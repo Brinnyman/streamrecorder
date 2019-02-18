@@ -19,13 +19,13 @@ class StreamRecorder:
         self.name = config['SETUP']['NAME']
         self.url = config['SETUP']['URL']
         self.recording_path = config['SETUP']['RECORDING_PATH']
+        self.type = ''
         self.streamlink_path = config['STREAMLINK']['STREAMLINK_PATH']
         self.streamlink_quality = config['STREAMLINK']['STREAMLINK_QUALITY']
         self.streamlink_commands = config['STREAMLINK']['STREAMLINK_COMMANDS']
         self.ffmpeg_path = config['FFMPEG']['FFMPEG_PATH']
         self.twitch_client_id = config['TWITCH']['TWITCH_CLIENT_ID']
-        self.type = ''
-        self.vod_id = '380587447'
+        self.vod_id = ''
 
     def record_twitch(self, recording_path, name, twitch_client_id, streamlink_quality, streamlink_commands):
         filesystem.create_directory(recording_path, name)
@@ -41,29 +41,31 @@ class StreamRecorder:
             time.sleep(15)
         return
 
-    def record_twitch_vod(self, recording_path, name, twitch_client_id, vod_id, streamlink_quality):
+    def record_twitch_vod(self, recording_path, name, twitch_client_id, vod_id, streamlink_quality):  
         info = twitch_api.get_vod_information(vod_id, twitch_client_id)
         filesystem.create_directory(recording_path, name)
         recorded_file = filesystem.create_file(info['channel']['name'], info['published_at'])
         url = 'twitch.tv/videos/' + vod_id
         r.record(url, recorded_file, streamlink_quality)
 
-    def record_stream(self, recording_path, name, url):
+    def record_stream(self, url, recording_path, name, streamlink_quality):
         while True:
             filesystem.create_directory(recording_path, name)
             recorded_file = filesystem.create_file(name, datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss"))
-            r.record(recording_path, recorded_file, url)
+            r.record(url, recorded_file, streamlink_quality)
             time.sleep(15)
 
     def twitch_stream_info(self):
         print(twitch_api.get_stream_information(self.name, self.twitch_client_id))
 
     def run(self):
-        print('Starting streamrecorder')
-        # TODO: cli parameters, as part of the helper module
-        # TODO: based on cli parameters execute functions
-        
-        # self.twitch_stream_info()
-        # self.record_twitch(self.recording_path, self.name, self.twitch_client_id, self.streamlink_quality, self.streamlink_commands)
-        # self.record_twitch_vod(self.recording_path, self.name, self.twitch_client_id, self.vod_id, self.streamlink_quality)
-        # self.record_stream(self.recording_path, self.name, self.url)
+        start = 'Starting streamrecorder'
+        if self.type == 'twitch':
+            print(start)        
+            self.record_twitch(self.recording_path, self.name, self.twitch_client_id, self.streamlink_quality, self.streamlink_commands)
+        elif self.type == 'vod':
+            print(start)        
+            self.record_twitch_vod(self.recording_path, self.name, self.twitch_client_id, self.vod_id, self.streamlink_quality)
+        elif self.type == 'stream':
+            print(start)        
+            self.record_stream(self.url, self.recording_path, self.name, self.streamlink_quality)
