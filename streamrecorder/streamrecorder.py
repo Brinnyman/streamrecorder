@@ -56,14 +56,13 @@ class StreamRecorder:
 
     def twitch_stream_info(self):
         print(twitch_api.get_stream_information(self.name, self.twitch_client_id))
-        print(twitch_api.get_stream_status(self.name, self.twitch_client_id))
 
     def run(self):
         print('Starting streamrecorder')
         # TODO: cli parameters, as part of the helper module
         # TODO: based on cli parameters execute functions
         
-        self.twitch_stream_info()
+        # self.twitch_stream_info()
         # self.record_twitch(self.recording_path, self.name, self.twitch_client_id, self.streamlink_quality, self.streamlink_commands)
         # self.record_twitch_vod(self.recording_path, self.name, self.twitch_client_id, self.vod_id, self.streamlink_quality)
         # self.record_stream(self.recording_path, self.name, self.url)
