@@ -7,6 +7,7 @@ class Recorder:
         self.ffmpeg_path = 'ffmpeg'
 
     # TODO: make quality optional because of vod recordings?
+    # TODO: streamlink doesnt like empty arguments, so find a way to have them optional. e.g. streamlink_commands
     def record(self, url, recorded_file, quality, *args):
         process = None
         try:
@@ -26,6 +27,11 @@ class Recorder:
 
         except OSError:
             print('An error has occurred while trying to use livestreamer package. Is it installed? Do you have Python in your PATH variable?')
+            sys.exit(1)
+        except KeyboardInterrupt:
+            print('Processes are being terminated')
+            process.wait()
+            process2.wait()
             sys.exit(1)
 
         return process2.stdout
