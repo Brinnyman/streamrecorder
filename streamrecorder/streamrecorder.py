@@ -40,11 +40,11 @@ class StreamRecorder:
         elif self.type == 'stream':
             print(start)        
             while True:
-                r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name)
+                r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name, self.streamlink_commands)
                 time.sleep(15)
         elif self.type == 'record':
             print(start)
-            r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name)
+            r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name, self.streamlink_commands)
         elif self.type == 'play':
             print(start)
             while True:

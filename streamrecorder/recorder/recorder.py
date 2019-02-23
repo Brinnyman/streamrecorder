@@ -40,10 +40,10 @@ class Recorder:
 
         return process2.stdout
 
-    def record(self, streamlink_path, url, streamlink_quality, ffmpeg_path, recording_path, name):
+    def record(self, streamlink_path, url, streamlink_quality, ffmpeg_path, recording_path, name, streamlink_commands):
         filesystem.create_directory(recording_path, name)
         recorded_file = filesystem.create_file(name, datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss"))
-        self.recorder(streamlink_path, url, streamlink_quality, ffmpeg_path,  recorded_file)
+        self.recorder(streamlink_path, url, streamlink_quality, ffmpeg_path,  recorded_file, streamlink_commands)
 
     def record_twitch(self, streamlink_path, twitch_client_id, streamlink_quality, ffmpeg_path, recording_path, name, streamlink_commands):
         filesystem.create_directory(recording_path, name)
