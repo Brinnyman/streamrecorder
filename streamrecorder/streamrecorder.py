@@ -1,5 +1,6 @@
 import os
 import configparser
+import time
 from twitch.api import TwitchAPI
 from recorder.recorder import Recorder
 from player.player import Player
@@ -38,13 +39,17 @@ class StreamRecorder:
             r.record_twitch_vod(self.streamlink_path, self.vod_id, self.twitch_client_id, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name)
         elif self.type == 'stream':
             print(start)        
-            r.record_stream(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name)
+            while True:
+                r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name)
+                time.sleep(15)
         elif self.type == 'record':
             print(start)
             r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name)
         elif self.type == 'play':
             print(start)
-            p.play_stream(self.streamlink_path, self.url, self.streamlink_quality)
+            while True:
+                p.play(self.streamlink_path, self.url, self.streamlink_quality)
+                time.sleep(15)
         else:
             print(start)
             p.play(self.streamlink_path, self.url, self.streamlink_quality)

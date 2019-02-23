@@ -40,13 +40,6 @@ class Recorder:
 
         return process2.stdout
 
-    def record_stream(self, streamlink_path, url, streamlink_quality, ffmpeg_path, recording_path, name):
-        while True:
-            filesystem.create_directory(recording_path, name)
-            recorded_file = filesystem.create_file(name, datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss"))
-            self.recorder(streamlink_path, url, streamlink_quality, ffmpeg_path, recorded_file)
-            time.sleep(15)
-
     def record(self, streamlink_path, url, streamlink_quality, ffmpeg_path, recording_path, name):
         filesystem.create_directory(recording_path, name)
         recorded_file = filesystem.create_file(name, datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss"))

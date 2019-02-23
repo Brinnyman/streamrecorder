@@ -19,10 +19,5 @@ class Player:
             sys.exit(1)
         return
 
-    def play_stream(self, streamlink_path, url, streamlink_quality):
-        while True:
-            self.player(streamlink_path, url, streamlink_quality)
-            time.sleep(15)
-
     def play(self, streamlink_path, url, streamlink_quality):
         self.player(streamlink_path, url, streamlink_quality)
