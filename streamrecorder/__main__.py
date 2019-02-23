@@ -16,7 +16,7 @@ def main(argv):
     usage += '-q, --quality     recording quality, first that is available <720p, 720p60, 1080p, 1080p60, best>. You can override these by providing the quality or pick the default Streamlink settings <best> or <worst>.\n'
     usage += '-r, --recordpath  recording path\n'
     usage += '-c, --commands    additional streamlink commands\n'
-    usage += '-t, --type        recording type <twitch, vod>\n'
+    usage += '-t, --type        recording type <twitch, vod, stream, record, play>\n'
     usage += '-v, --vod         twitch vod id\n'
     usage += '-i, --info        twitch stream information\n'
 
