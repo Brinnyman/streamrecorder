@@ -32,13 +32,19 @@ class StreamRecorder:
     def run(self):
         start = 'Starting streamrecorder'
         if self.type == 'twitch':
-            print(start)        
-            r.record_twitch(self.streamlink_path, self.twitch_client_id, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name, self.streamlink_commands)
+            print(start)
+            while True:
+                status = twitch_api.get_stream_status(self.name, self.twitch_client_id)
+                if status == 1:
+                    print(self.name, "online.")
+                    self.url = 'twitch.tv/' + self.name
+                    r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name, self.streamlink_commands)
+                time.sleep(15)
         elif self.type == 'vod':
-            print(start)        
+            print(start)
             r.record_twitch_vod(self.streamlink_path, self.vod_id, self.twitch_client_id, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name)
         elif self.type == 'stream':
-            print(start)        
+            print(start)
             while True:
                 r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name, self.streamlink_commands)
                 time.sleep(15)
