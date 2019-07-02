@@ -30,8 +30,15 @@ class StreamRecorder:
         print(twitch_api.get_stream_information(self.name, self.twitch_client_id))
 
     def run(self):
+        title = " ____  _                            ____                        _           \n"
+        title += "/ ___|| |_ _ __ ___  __ _ _ __ ___ |  _ \ ___  ___ ___  _ __ __| | ___ _ __ \n"
+        title += "\___ \| __| '__/ _ \/ _` | '_ ` _ \| |_) / _ \/ __/ _ \| '__/ _` |/ _ \ '__|\n"
+        title += " ___) | |_| | |  __/ (_| | | | | | |  _ <  __/ (_| (_) | | | (_| |  __/ |\n"   
+        title += "|____/ \__|_|  \___|\__,_|_| |_| |_|_| \_\___|\___\___/|_|  \__,_|\___|_|\n"
+        title += '\n'
         start = 'Starting streamrecorder'
         if self.type == 'twitch':
+            print(title)
             print(start)
             while True:
                 status = twitch_api.get_stream_status(self.name, self.twitch_client_id)

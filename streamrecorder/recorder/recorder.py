@@ -3,10 +3,12 @@ import sys
 import time
 import datetime
 from helpers.filesystem import Filesystem
+from helpers.contactsheet import ContactSheet
 from twitch.api import TwitchAPI
 
 twitch_api = TwitchAPI()
 filesystem = Filesystem()
+contactsheet = ContactSheet()
 
 class Recorder:
     # TODO: make quality optional because of vod recordings?
@@ -17,15 +19,15 @@ class Recorder:
         try:
             print('Recording in session.')
             
-            print('start streamlink')
             streamlink = [streamlink_path, url, streamlink_quality, '--stdout'] + list(args)
             process = subprocess.Popen(streamlink, stdout=subprocess.PIPE, stderr=None)
 
-            print('start ffmpeg')
-            ffmpeg = [ffmpeg_path, '-err_detect', 'ignore_err', '-i', 'pipe:0', '-c', 'copy', recorded_file, '-loglevel', 'quiet']
+            ffmpeg = [ffmpeg_path, '-err_detect', 'ignore_err', '-i', 'pipe:0', '-c', 'copy', recorded_file + '.mp4', '-loglevel', 'quiet']
             process2 = subprocess.Popen(ffmpeg, stdin=process.stdout, stdout=subprocess.PIPE, stderr=None)
 
+            print('start streamlink')
             process.stdout.close()
+            print('start ffmpeg')
             process2.communicate()
             print('Recording is done.')
 
@@ -44,6 +46,7 @@ class Recorder:
         filesystem.create_directory(recording_path, name)
         recorded_file = filesystem.create_file(name, datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss"))
         self.recorder(streamlink_path, url, streamlink_quality, ffmpeg_path,  recorded_file, streamlink_commands)
+        contactsheet.create_contact_sheet(recorded_file)
 
     def record_twitch_vod(self, streamlink_path, vod_id, twitch_client_id, streamlink_quality, ffmpeg_path, recording_path, name):  
         filesystem.create_directory(recording_path, name)
@@ -51,3 +54,4 @@ class Recorder:
         recorded_file = filesystem.create_file(info['channel']['name'], info['published_at'])
         url = 'twitch.tv/videos/' + vod_id
         self.recorder(streamlink_path, url, streamlink_quality, ffmpeg_path, recorded_file)
+        contactsheet.create_contact_sheet(recorded_file)

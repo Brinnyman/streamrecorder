@@ -7,7 +7,14 @@ def main(argv):
     """Exectute command line options."""
     sr = StreamRecorder()
 
-    usage = 'Usage: streamrecorder [options]\n'
+    usage = "\n"
+    usage += " ____  _                            ____                        _           \n"
+    usage += "/ ___|| |_ _ __ ___  __ _ _ __ ___ |  _ \ ___  ___ ___  _ __ __| | ___ _ __ \n"
+    usage += "\___ \| __| '__/ _ \/ _` | '_ ` _ \| |_) / _ \/ __/ _ \| '__/ _` |/ _ \ '__|\n"
+    usage += " ___) | |_| | |  __/ (_| | | | | | |  _ <  __/ (_| (_) | | | (_| |  __/ |\n"   
+    usage += "|____/ \__|_|  \___|\__,_|_| |_| |_|_| \_\___|\___\___/|_|  \__,_|\___|_|\n"
+    usage += '\n'
+    usage += 'Usage: streamrecorder [options]\n'
     usage += '\n'
     usage += 'Options:\n'
     usage += '-h, --help        prints this message\n'
@@ -36,6 +43,9 @@ def main(argv):
         if option == '-h':
             print(usage)
             sys.exit()
+        elif option in ('-i', '--info'):
+            sr.twitch_stream_info()
+            sys.exit()
         elif option in ('-n', '--name'):
             sr.name = arg
         elif option in ('-u', '--url'):
@@ -50,8 +60,6 @@ def main(argv):
             sr.type = arg
         elif option in ('-v', '--vod'):
             sr.vod_id = arg
-        elif option in ('-i', '--info'):
-            sr.twitch_stream_info()
 
     sr.run()
 

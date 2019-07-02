@@ -18,3 +18,8 @@ streamrecorder -n <twitchstreamer> -t twitch -q 720p
 streamrecorder -n <twitchstreamer> -t vod -v <vod_id> -q best
 streamrecorder -n <name> -u <url> -t stream -q 720p
 ```
+
+## Requirements
+- ffmpeg
+- streamlink
+- vcsi
