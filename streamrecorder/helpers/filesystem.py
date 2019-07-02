@@ -23,8 +23,8 @@ class Filesystem:
 
     # create file
     def create_file(self, name, date):
-        # create file with specified name and extension
-        self.filename = name + '_' + date + ".mp4"
+        # create file with specified name
+        self.filename = name + '_' + date
         self.filename = "".join(x for x in self.filename if x.isalnum()
                            or x in ["-", "_", "."])
         self.filename = os.path.join(self.get_directory(), self.filename)
