@@ -37,8 +37,9 @@ class StreamRecorder:
         title += "|____/ \__|_|  \___|\__,_|_| |_| |_|_| \_\___|\___\___/|_|  \__,_|\___|_|\n"
         title += '\n'
         start = 'Starting streamrecorder'
+        print(title)
+        
         if self.type == 'twitch':
-            print(title)
             print(start)
             while True:
                 status = twitch_api.get_stream_status(self.name, self.twitch_client_id)
