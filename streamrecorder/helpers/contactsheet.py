@@ -16,3 +16,8 @@ class ContactSheet:
             sys.exit(1)
 
         return process.stdout
+
+    def bulk_contact_sheet(self, files):
+        for f in files:
+            print(f)
+            self.create_contact_sheet(f)

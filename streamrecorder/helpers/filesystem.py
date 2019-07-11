@@ -34,3 +34,40 @@ class Filesystem:
     def get_filename(self):
         # return filename
         return self.filename
+
+    # get list of files in directory
+    def get_files_in_directory(self, directory):
+        files = []
+        for dirpath,_,filenames in os.walk(directory):
+            for f in filenames:
+                file = os.path.abspath(os.path.join(dirpath, f))
+                files.append(file)
+            
+        return files
+
+    def add_file_extension(self, file, extension):
+        file += extension
+        
+        return file
+
+    def remove_file_extension(self, file):
+        return os.path.splitext(file)[0]
+
+    def filtered_files(self, directory, extension):
+        files = self.get_files_in_directory(directory)
+        export = []
+        filtered_list = []
+
+        for f in files:
+            x = self.remove_file_extension(f)
+            x += extension
+            filtered_list.append(x)
+
+        first = set(self.get_files_in_directory(directory))
+        second = [item for item in filtered_list if item not in first]
+
+        for s in second:
+            x = self.remove_file_extension(s)
+            export.append(x)
+
+        return export

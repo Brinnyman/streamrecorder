@@ -38,6 +38,7 @@ class Recorder:
             print('Processes are being terminated')
             process.wait()
             process2.wait()
+            contactsheet.create_contact_sheet(recorded_file)
             sys.exit(1)
 
         return process2.stdout

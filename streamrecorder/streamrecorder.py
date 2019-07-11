@@ -4,11 +4,15 @@ import time
 from twitch.api import TwitchAPI
 from recorder.recorder import Recorder
 from player.player import Player
+from helpers.filesystem import Filesystem
+from helpers.contactsheet import ContactSheet
 
 
 twitch_api = TwitchAPI()
 r = Recorder()
 p = Player()
+f = Filesystem()
+cs = ContactSheet()
 
 
 class StreamRecorder:
@@ -25,6 +29,7 @@ class StreamRecorder:
         self.ffmpeg_path = config['FFMPEG']['FFMPEG_PATH']
         self.twitch_client_id = config['TWITCH']['TWITCH_CLIENT_ID']
         self.vod_id = ''
+        self.contact_sheet_extension = config['VCSI']['CONTACT_SHEET_EXTENSION']
 
     def twitch_stream_info(self):
         print(twitch_api.get_stream_information(self.name, self.twitch_client_id))
@@ -64,6 +69,10 @@ class StreamRecorder:
             while True:
                 p.play(self.streamlink_path, self.url, self.streamlink_quality)
                 time.sleep(15)
+        elif self.type == 'contact':
+            print(start)
+            cs.bulk_contact_sheet(f.filtered_files(self.recording_path, self.contact_sheet_extension))
+
         else:
             print(start)
             p.play(self.streamlink_path, self.url, self.streamlink_quality)
