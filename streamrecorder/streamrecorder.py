@@ -7,7 +7,6 @@ from player.player import Player
 from helpers.filesystem import Filesystem
 from helpers.contactsheet import ContactSheet
 
-
 twitch_api = TwitchAPI()
 r = Recorder()
 p = Player()
@@ -25,7 +24,6 @@ class StreamRecorder:
         self.type = ''
         self.streamlink_path = config['STREAMLINK']['STREAMLINK_PATH']
         self.streamlink_quality = config['STREAMLINK']['STREAMLINK_QUALITY']
-        self.streamlink_commands = config['STREAMLINK']['STREAMLINK_COMMANDS']
         self.ffmpeg_path = config['FFMPEG']['FFMPEG_PATH']
         self.twitch_client_id = config['TWITCH']['TWITCH_CLIENT_ID']
         self.vod_id = ''
@@ -38,12 +36,12 @@ class StreamRecorder:
         title = " ____  _                            ____                        _           \n"
         title += "/ ___|| |_ _ __ ___  __ _ _ __ ___ |  _ \ ___  ___ ___  _ __ __| | ___ _ __ \n"
         title += "\___ \| __| '__/ _ \/ _` | '_ ` _ \| |_) / _ \/ __/ _ \| '__/ _` |/ _ \ '__|\n"
-        title += " ___) | |_| | |  __/ (_| | | | | | |  _ <  __/ (_| (_) | | | (_| |  __/ |\n"   
+        title += " ___) | |_| | |  __/ (_| | | | | | |  _ <  __/ (_| (_) | | | (_| |  __/ |\n"
         title += "|____/ \__|_|  \___|\__,_|_| |_| |_|_| \_\___|\___\___/|_|  \__,_|\___|_|\n"
         title += '\n'
         start = 'Starting streamrecorder'
         print(title)
-        
+
         if self.type == 'twitch':
             print(start)
             while True:
@@ -51,19 +49,23 @@ class StreamRecorder:
                 if status == 1:
                     print(self.name, "online.")
                     self.url = 'twitch.tv/' + self.name
-                    r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name, self.streamlink_commands)
+                    r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path,
+                             self.recording_path, self.name)
                 time.sleep(15)
         elif self.type == 'vod':
             print(start)
-            r.record_twitch_vod(self.streamlink_path, self.vod_id, self.twitch_client_id, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name)
+            r.record_twitch_vod(self.streamlink_path, self.vod_id, self.twitch_client_id, self.streamlink_quality,
+                                self.ffmpeg_path, self.recording_path, self.name)
         elif self.type == 'stream':
             print(start)
             while True:
-                r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name, self.streamlink_commands)
+                r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path,
+                         self.name)
                 time.sleep(15)
         elif self.type == 'record':
             print(start)
-            r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path, self.name, self.streamlink_commands)
+            r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path,
+                     self.name)
         elif self.type == 'play':
             print(start)
             while True:

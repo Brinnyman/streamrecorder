@@ -1,6 +1,5 @@
 from helpers.xmlHttpRequest import XmlHttpRequest
 
-
 xhr = XmlHttpRequest()
 
 
@@ -19,7 +18,7 @@ class TwitchAPI:
         status = None
         if info['stream'] is None:
             status = 0
-        elif info['stream']['stream_type'] == 'live':		
+        elif info['stream']['stream_type'] == 'live':
             status = 1
 
         return status

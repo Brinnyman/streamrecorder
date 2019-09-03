@@ -12,7 +12,8 @@ class Player:
             print('close streamlink')
 
         except OSError:
-            print('An error has occurred while trying to use streamlink package. Is it installed? Do you have Python in your PATH variable?')
+            print(
+                'An error has occurred while trying to use streamlink package. Is it installed? Do you have Python in your PATH variable?')
             sys.exit(1)
         except KeyboardInterrupt:
             print('Processes are being terminated')

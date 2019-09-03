@@ -11,7 +11,7 @@ def main(argv):
     usage += " ____  _                            ____                        _           \n"
     usage += "/ ___|| |_ _ __ ___  __ _ _ __ ___ |  _ \ ___  ___ ___  _ __ __| | ___ _ __ \n"
     usage += "\___ \| __| '__/ _ \/ _` | '_ ` _ \| |_) / _ \/ __/ _ \| '__/ _` |/ _ \ '__|\n"
-    usage += " ___) | |_| | |  __/ (_| | | | | | |  _ <  __/ (_| (_) | | | (_| |  __/ |\n"   
+    usage += " ___) | |_| | |  __/ (_| | | | | | |  _ <  __/ (_| (_) | | | (_| |  __/ |\n"
     usage += "|____/ \__|_|  \___|\__,_|_| |_| |_|_| \_\___|\___\___/|_|  \__,_|\___|_|\n"
     usage += '\n'
     usage += 'Usage: streamrecorder [options]\n'
@@ -22,7 +22,6 @@ def main(argv):
     usage += '-u, --url         stream url\n'
     usage += '-q, --quality     recording quality, first that is available <720p, 720p60, 1080p, 1080p60, best>. You can override these by providing the quality or pick the default Streamlink settings <best> or <worst>.\n'
     usage += '-r, --recordpath  recording path\n'
-    usage += '-c, --commands    additional streamlink commands\n'
     usage += '-t, --type        recording type <twitch, vod, stream, record, play>\n'
     usage += '-v, --vod         twitch vod id\n'
     usage += '-i, --info        twitch stream information\n'
@@ -33,7 +32,8 @@ def main(argv):
 
     try:
         options, remainder = getopt.getopt(
-            sys.argv[1:], 'hn:u:q:r:c:t:v:i', ['name=', 'url=', 'quality=', 'recordpath=', 'commands=', 'type=', 'vod=', 'info'])
+            sys.argv[1:], 'hn:u:q:r:t:v:i',
+            ['name=', 'url=', 'quality=', 'recordpath=', 'type=', 'vod=', 'info'])
     except getopt.GetoptError as e:
         print(e)
         print(usage)
@@ -54,8 +54,6 @@ def main(argv):
             sr.quality = arg
         elif option in ('-r', '--recordpath'):
             sr.recording_path = arg
-        elif option in ('-c', '--commands'):
-            sr.streamlink_commands = arg
         elif option in ('-t', '--type'):
             sr.type = arg
         elif option in ('-v', '--vod'):

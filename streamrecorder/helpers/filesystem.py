@@ -13,7 +13,7 @@ class Filesystem:
         # create directory with at the specified path
         self.directory = os.path.join(os.path.abspath(path), name)
 
-        if(os.path.isdir(self.directory) is False):
+        if (os.path.isdir(self.directory) is False):
             os.makedirs(self.directory)
 
     # get directory
@@ -26,7 +26,7 @@ class Filesystem:
         # create file with specified name
         self.filename = name + '_' + date
         self.filename = "".join(x for x in self.filename if x.isalnum()
-                           or x in ["-", "_", "."])
+                                or x in ["-", "_", "."])
         self.filename = os.path.join(self.get_directory(), self.filename)
         return self.filename
 
@@ -38,16 +38,16 @@ class Filesystem:
     # get list of files in directory
     def get_files_in_directory(self, directory):
         files = []
-        for dirpath,_,filenames in os.walk(directory):
+        for dirpath, _, filenames in os.walk(directory):
             for f in filenames:
                 file = os.path.abspath(os.path.join(dirpath, f))
                 files.append(file)
-            
+
         return files
 
     def add_file_extension(self, file, extension):
         file += extension
-        
+
         return file
 
     def remove_file_extension(self, file):

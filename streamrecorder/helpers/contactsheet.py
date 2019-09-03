@@ -1,6 +1,7 @@
 import subprocess
 import sys
 
+
 class ContactSheet:
     def create_contact_sheet(self, recorded_file, *args):
         process = None
@@ -12,7 +13,8 @@ class ContactSheet:
             process.communicate()
 
         except OSError:
-            print('An error has occurred while trying to use vcsi. Is it installed? Do you have Python in your PATH variable?')
+            print(
+                'An error has occurred while trying to use vcsi. Is it installed? Do you have Python in your PATH variable?')
             sys.exit(1)
 
         return process.stdout
