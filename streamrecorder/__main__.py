@@ -1,66 +1,41 @@
-import getopt
+import argparse
 import sys
-from streamrecorder import StreamRecorder
+import asyncio
+import selectors
+import signal
+from streamrecorder import Streamrecorder
 
+def main(args):
+    sr = Streamrecorder()
+    sr.stream_name = args.stream_name
+    sr.stream_id = args.stream_id
+    sr.recording_path = args.path
+    sr.stream_type = args.stream_type
+    sr.quality = args.stream_quality
+    sr.enable_contactsheet = args.enable_contactsheet
 
-def main(argv):
-    """Exectute command line options."""
-    sr = StreamRecorder()
+    if sys.platform == 'win32':
+        loop = asyncio.ProactorEventLoop()
+    elif sys.platform == 'darwin':
+        selector = selectors.SelectSelector()
+        loop = asyncio.SelectorEventLoop(selector)
+    else:
+        loop = asyncio.get_event_loop()
 
-    usage = "\n"
-    usage += " ____  _                            ____                        _           \n"
-    usage += "/ ___|| |_ _ __ ___  __ _ _ __ ___ |  _ \ ___  ___ ___  _ __ __| | ___ _ __ \n"
-    usage += "\___ \| __| '__/ _ \/ _` | '_ ` _ \| |_) / _ \/ __/ _ \| '__/ _` |/ _ \ '__|\n"
-    usage += " ___) | |_| | |  __/ (_| | | | | | |  _ <  __/ (_| (_) | | | (_| |  __/ |\n"
-    usage += "|____/ \__|_|  \___|\__,_|_| |_| |_|_| \_\___|\___\___/|_|  \__,_|\___|_|\n"
-    usage += '\n'
-    usage += 'Usage: streamrecorder [options]\n'
-    usage += '\n'
-    usage += 'Options:\n'
-    usage += '-h, --help        prints this message\n'
-    usage += '-n, --name        streamer channel\n'
-    usage += '-u, --url         stream url\n'
-    usage += '-q, --quality     recording quality, first that is available <720p, 720p60, 1080p, 1080p60, best>. You can override these by providing the quality or pick the default Streamlink settings <best> or <worst>.\n'
-    usage += '-r, --recordpath  recording path\n'
-    usage += '-t, --type        recording type <twitch, vod, stream, record, play>\n'
-    usage += '-v, --vod         twitch vod id\n'
-    usage += '-i, --info        twitch stream information\n'
-
-    if len(sys.argv) <= 1:
-        print(usage)
-        sys.exit(1)
+    asyncio.set_event_loop(loop)
 
     try:
-        options, remainder = getopt.getopt(
-            sys.argv[1:], 'hn:u:q:r:t:v:i',
-            ['name=', 'url=', 'quality=', 'recordpath=', 'type=', 'vod=', 'info'])
-    except getopt.GetoptError as e:
-        print(e)
-        print(usage)
-        sys.exit(2)
-
-    for option, arg in options:
-        if option == '-h':
-            print(usage)
-            sys.exit()
-        elif option in ('-i', '--info'):
-            sr.twitch_stream_info()
-            sys.exit()
-        elif option in ('-n', '--name'):
-            sr.name = arg
-        elif option in ('-u', '--url'):
-            sr.url = arg
-        elif option in ('-q', '--quality'):
-            sr.quality = arg
-        elif option in ('-r', '--recordpath'):
-            sr.recording_path = arg
-        elif option in ('-t', '--type'):
-            sr.type = arg
-        elif option in ('-v', '--vod'):
-            sr.vod_id = arg
-
-    sr.run()
-
+        loop.run_until_complete(sr.run())
+    finally:
+        loop.close()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    my_parser = argparse.ArgumentParser(prog='streamrecorder', description='Record a stream', allow_abbrev=False)
+    my_parser.add_argument('-n', '--name', metavar='name', dest='stream_name', type=str, required=True, help='stream name')
+    my_parser.add_argument('-t', '--type', metavar='type', dest='stream_type', type=str, required=True, help='stream type')
+    my_parser.add_argument('-i', '--id', metavar='id', dest='stream_id', type=str, help='Twitch stream identification')
+    my_parser.add_argument('-p', '--path', metavar='path', dest='path', type=str, help='recording path')
+    my_parser.add_argument('-q', '--quality', metavar='quality', dest='stream_quality', type=str, help='stream quality')
+    my_parser.add_argument('-c', '--contact', dest='enable_contactsheet', action='store_false', help='disable contactsheet generation')
+    args = my_parser.parse_args()
+    main(args)
