@@ -1,7 +1,8 @@
 import asyncio
-from plugin.twitch import Twitch_stream
-from plugin.cb import Cb_stream
+from plugin.twitch import TwitchStream
+from plugin.cb import CbStream
 from recorder.recorder import Recorder
+
 
 class Streamrecorder:
     def __init__(self):
@@ -25,7 +26,7 @@ class Streamrecorder:
 
         if self.stream_type == 'stream':
             while True:
-                channel = Twitch_stream(self.stream_id, self.stream_name, self.stream_type, self.quality)
+                channel = TwitchStream(self.stream_id, self.stream_name, self.stream_type, self.quality)
                 status = channel.get_stream_status()
                 if status == 'live':
                     print(status)
@@ -35,12 +36,12 @@ class Streamrecorder:
                     print(status)
                     await asyncio.sleep(15)
         elif self.stream_type == 'vod':
-            channel = Twitch_stream(self.stream_id, self.stream_name, self.stream_type, self.quality)
+            channel = TwitchStream(self.stream_id, self.stream_name, self.stream_type, self.quality)
             recorder = Recorder()
             await asyncio.gather(recorder.record(self.recording_path, channel, self.enable_contactsheet))
         elif self.stream_type == 'cb':
             while True:
-                cb = Cb_stream(self.stream_name)
+                cb = CbStream(self.stream_name)
                 status = cb.get_stream_status()
                 print(status)
                 if status == 'public':

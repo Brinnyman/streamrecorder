@@ -5,7 +5,7 @@ import random
 import m3u8
 
 
-class Twitch_api:
+class TwitchApi:
     def __init__(self):
         self.config = configparser.ConfigParser()
         self.config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../config.ini'))
@@ -45,7 +45,8 @@ class Twitch_api:
         json = r.json()
         return json
 
-class Twitch_stream:
+
+class TwitchStream:
     def __init__(self, stream_id, stream_name, stream_type, stream_quality):
         self.stream_id = stream_id
         self.stream_name = stream_name
@@ -65,26 +66,26 @@ class Twitch_stream:
         return self.stream_quality
 
     def get_stream_uri(self):
-        stream = Twitch_api()
+        stream = TwitchApi()
         stream.set_tokens(self.get_stream_type())
         stream_uri_dictionary = stream.get_stream(self.get_stream_id())
         get_stream_uris = {}
         for p in stream_uri_dictionary.playlists:
             get_stream_uris[p.media[0].name] = p.uri
-        uri = [val for key, val in get_stream_uris.items() if self.get_stream_quality() in key] 
+        uri = [val for key, val in get_stream_uris.items() if self.get_stream_quality() in key]
         return uri[0]
 
     def get_stream_info(self):
-        stream = Twitch_api()
+        stream = TwitchApi()
         stream.set_tokens(self.get_stream_type())
         stream_info = stream.get_stream_info(self.get_stream_id())
         return stream_info
 
     def get_stream_status(self):
-        stream = Twitch_api()
+        stream = TwitchApi()
         stream.set_tokens(self.get_stream_type())
         stream_info = stream.get_stream_info(self.get_stream_id())
-        if stream_info['stream'] == None:
+        if stream_info['stream'] is None:
             return 'offline'
         else:
             return stream_info['stream']['stream_type']

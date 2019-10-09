@@ -19,7 +19,7 @@ class Recorder():
         ffmpeg = '{} -i {} -c copy {}.mkv'.format(self.ffmpeg_path, channel.get_stream_uri(), filename)
         proc = await asyncio.create_subprocess_shell(ffmpeg, stdout=asyncio.subprocess.PIPE)
         await proc.wait()
-        
-        if (enable_contactsheet == True):
+
+        if enable_contactsheet:
             contactsheet = ContactSheet()
             contactsheet.create_contact_sheet(filename)

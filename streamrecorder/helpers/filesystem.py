@@ -1,5 +1,6 @@
 import os
 
+
 class Filesystem:
     def __init__(self, directory, filename):
         self.directory = directory
@@ -14,7 +15,7 @@ class Filesystem:
     def create_directory(self):
         self.directory = os.path.join(os.path.abspath(self.directory), self.filename)
 
-        if (os.path.isdir(self.directory) is False):
+        if os.path.isdir(self.directory) is False:
             os.makedirs(self.directory)
 
     def create_file(self, date):

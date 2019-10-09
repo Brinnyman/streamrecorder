@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 
+
 class ContactSheet:
     def __init__(self):
         config = configparser.ConfigParser()
@@ -12,7 +13,8 @@ class ContactSheet:
     def create_contact_sheet(self, recorded_file):
         process = None
         try:
-            vcsi = [self.contact_sheet_extension, recorded_file + '.mkv', '-t', '-w', '850', '-g', ' 3x5', '-o', recorded_file + '.png']
+            vcsi = [self.contact_sheet_extension, recorded_file + '.mkv', '-t', '-w', '850', '-g', ' 3x5', '-o',
+                    recorded_file + '.png']
             process = subprocess.Popen(vcsi, stdout=subprocess.PIPE, stderr=None)
             process.communicate()
 
