@@ -89,9 +89,9 @@ class CbApi:
             get_stream_uris[str(p.stream_info.resolution[1])] = uri
         final_sorted_streams = self.final_sorted_streams(get_stream_uris)
         if quality == '':
-            quality = 'best'
-
-        return [val for key, val in final_sorted_streams.items() if quality in key]
+            quality = 'besst'
+        uri = [val for key, val in final_sorted_streams.items() if quality in key]
+        return uri[0]
 
     def get_stream_info(self, url):
         headers, cookies, post_data = self.get_token(url)
