@@ -43,7 +43,6 @@ class Streamrecorder:
             while True:
                 cb = CbStream(self.stream_name, self.quality)
                 status = cb.get_stream_status()
-                print(status)
                 if status == 'public':
                     print(status)
                     recorder = Recorder()
