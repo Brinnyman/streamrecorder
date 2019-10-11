@@ -2,11 +2,13 @@ import re
 import uuid
 import requests
 import m3u8
+from collections import OrderedDict
 
 
 class CbApi:
     def __init__(self):
         self.api_url = 'https://chaturbate.com/get_edge_hls_url_ajax/'
+        self.playlist = ''
         self.base_uri = ''
 
     def get_token(self, url):
@@ -26,17 +28,58 @@ class CbApi:
             "csrftoken": csrf_token,
         }
 
-        post_data = "room_slug={0}&bandwidth=low".format(username)
+        post_data = "room_slug={0}&bandwidth=high".format(username)
         r = requests.post(self.api_url, headers=headers, cookies=cookies, data=post_data)
         json = r.json()
-        self.base_uri = json['url'].split("playlist.m3u8",1)[0]
-        return json, headers, cookies, post_data
+        self.playlist = json['url']
+        self.base_uri = self.playlist.split("playlist.m3u8",1)[0]
+        return headers, cookies, post_data
 
     def get_stream(self, url):
-        json, headers, cookies, post_data = self.get_token(url)
-        r = requests.post(json['url'], headers=headers, cookies=cookies, data=post_data)
+        headers, cookies, post_data = self.get_token(url)
+        r = requests.post(self.playlist, headers=headers, cookies=cookies, data=post_data)
         m3u8_obj = m3u8.loads(r.text)
         return m3u8_obj
+
+    def final_sorted_streams(self, uris):
+        def stream_weight(stream):
+            match = re.match(r"^(\d+)(p)?(\d+)?(\+)?$", stream)
+
+            if match:
+                weight = 0
+                name_type = match.group(2)
+
+                if name_type == "p":
+                    weight += int(match.group(1))
+
+                    if match.group(3):
+                        weight += int(match.group(3))
+
+                    if match.group(4) == "+":
+                        weight += 1
+
+                    return weight, "pixels"
+
+            return 0, "none"
+
+        def stream_weight_only(s):
+            return (stream_weight(s)[0] or
+                    (len(uris) == 1 and 1))
+
+        stream_names = uris.keys()
+        sorted_streams = sorted(stream_names, key=stream_weight_only)
+        final_sorted_streams = OrderedDict()
+
+        for stream_name in sorted(uris, key=stream_weight_only):
+            final_sorted_streams[stream_name] = uris[stream_name]
+
+        if len(sorted_streams) > 0:
+            worst = sorted_streams[0]
+            best = sorted_streams[-1]
+            final_sorted_streams["worst"] = uris[worst]
+            final_sorted_streams["best"] = uris[best]
+
+        return final_sorted_streams
 
     def get_stream_uri(self, url, quality):
         m3u8_obj = self.get_stream(url)
@@ -44,30 +87,33 @@ class CbApi:
         for p in m3u8_obj.playlists:
             uri = self.base_uri + p.uri
             get_stream_uris[str(p.stream_info.resolution[1])] = uri
-        uri = [val for key, val in get_stream_uris.items() if quality in key]
-        return uri[0]
+        final_sorted_streams = self.final_sorted_streams(get_stream_uris)
+        if quality == '':
+            quality = 'best'
+
+        return [val for key, val in final_sorted_streams.items() if quality in key]
 
     def get_stream_info(self, url):
-        json, headers, cookies, post_data = self.get_token(url)
+        headers, cookies, post_data = self.get_token(url)
         r = requests.post(self.api_url, headers=headers, cookies=cookies, data=post_data)
         json = r.json()
         return json
 
 
 class CbStream:
-    def __init__(self, name, quality):
-        self.name = name
-        self.url = 'https://chaturbate.com/' + name
-        self.quality = quality
+    def __init__(self, stream_name, stream_quality):
+        self.stream_name = stream_name
+        self.url = 'https://chaturbate.com/' + stream_name
+        self.stream_quality = stream_quality
 
     def get_stream_name(self):
-        return self.name
+        return self.stream_name
 
     def get_stream_url(self):
         return self.url
 
     def get_stream_quality(self):
-        return self.quality
+        return self.stream_quality
 
     def get_stream_uri(self):
         stream = CbApi()
@@ -86,3 +132,4 @@ class CbStream:
             return stream_info["room_status"]
         else:
             return 'offline'
+        
