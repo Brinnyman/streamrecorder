@@ -48,7 +48,7 @@ class CbApi:
         return uri[0]
 
     def get_stream_info(self, url):
-        headers, cookies, post_data = self.get_token(url)
+        json, headers, cookies, post_data = self.get_token(url)
         r = requests.post(self.api_url, headers=headers, cookies=cookies, data=post_data)
         json = r.json()
         return json
