@@ -3,6 +3,8 @@ import os
 import requests
 import random
 import m3u8
+import re
+from collections import OrderedDict
 
 
 class TwitchApi:
@@ -32,6 +34,46 @@ class TwitchApi:
         sig = json['sig']
         return token, sig
 
+    def final_sorted_streams(self, uris):
+        def stream_weight(stream):
+            match = re.match(r"^(\d+)(p)?(\d+)?(\+)?$", stream)
+
+            if match:
+                weight = 0
+                name_type = match.group(2)
+
+                if name_type == "p":
+                    weight += int(match.group(1))
+
+                    if match.group(3):
+                        weight += int(match.group(3))
+
+                    if match.group(4) == "+":
+                        weight += 1
+
+                    return weight, "pixels"
+
+            return 0, "none"
+
+        def stream_weight_only(s):
+            return (stream_weight(s)[0] or
+                    (len(uris) == 1 and 1))
+
+        stream_names = uris.keys()
+        sorted_streams = sorted(stream_names, key=stream_weight_only)
+        final_sorted_streams = OrderedDict()
+
+        for stream_name in sorted(uris, key=stream_weight_only):
+            final_sorted_streams[stream_name] = uris[stream_name]
+
+        if len(sorted_streams) > 0:
+            worst = sorted_streams[0]
+            best = sorted_streams[-1]
+            final_sorted_streams["worst"] = uris[worst]
+            final_sorted_streams["best"] = uris[best]
+
+        return final_sorted_streams
+
     def get_stream(self, stream_id):
         token, sig = self.get_token(stream_id)
         url = self.usher_token.format(stream_id=stream_id, token=token, sig=sig, random=random.randint(0, 1E7))
@@ -44,7 +86,11 @@ class TwitchApi:
         get_stream_uris = {}
         for p in stream_uri_dictionary.playlists:
             get_stream_uris[p.media[0].name] = p.uri
-        uri = [val for key, val in get_stream_uris.items() if quality in key]
+        final_sorted_streams = self.final_sorted_streams(get_stream_uris)
+        if quality == '':
+            quality = 'best'
+
+        uri = [val for key, val in final_sorted_streams.items() if quality in key]
         return uri[0]
 
     def get_stream_info(self, stream_id):
