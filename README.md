@@ -15,7 +15,7 @@ optional arguments:
 
 ```Shell
 Example:
-python streamrecorder -n lirik -i lirik -t stream -q 720p
+python streamrecorder -n lirik -i lirik -t stream -q 720p -p ./recording
 ```
 
 ## Requirements

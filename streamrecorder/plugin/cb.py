@@ -7,6 +7,7 @@ import m3u8
 class CbApi:
     def __init__(self):
         self.api_url = 'https://chaturbate.com/get_edge_hls_url_ajax/'
+        self.base_uri = ''
 
     def get_token(self, url):
         _url_re = re.compile(r"https?://(\w+\.)?chaturbate\.com/(?P<username>\w+)")
@@ -25,14 +26,26 @@ class CbApi:
             "csrftoken": csrf_token,
         }
 
-        post_data = "room_slug={0}&bandwidth=high".format(username)
-        return headers, cookies, post_data
+        post_data = "room_slug={0}&bandwidth=low".format(username)
+        r = requests.post(self.api_url, headers=headers, cookies=cookies, data=post_data)
+        json = r.json()
+        self.base_uri = json['url'].split("playlist.m3u8",1)[0]
+        return json, headers, cookies, post_data
 
     def get_stream(self, url):
-        headers, cookies, post_data = self.get_token(url)
-        r = requests.post(self.api_url, headers=headers, cookies=cookies, data=post_data)
+        json, headers, cookies, post_data = self.get_token(url)
+        r = requests.post(json['url'], headers=headers, cookies=cookies, data=post_data)
         m3u8_obj = m3u8.loads(r.text)
         return m3u8_obj
+
+    def get_stream_uri(self, url, quality):
+        m3u8_obj = self.get_stream(url)
+        get_stream_uris = {}
+        for p in m3u8_obj.playlists:
+            uri = self.base_uri + p.uri
+            get_stream_uris[str(p.stream_info.resolution[1])] = uri
+        uri = [val for key, val in get_stream_uris.items() if quality in key]
+        return uri[0]
 
     def get_stream_info(self, url):
         headers, cookies, post_data = self.get_token(url)
@@ -42,20 +55,24 @@ class CbApi:
 
 
 class CbStream:
-    def __init__(self, name):
+    def __init__(self, name, quality):
         self.name = name
         self.url = 'https://chaturbate.com/' + name
-
-    def get_stream_url(self):
-        return self.url
+        self.quality = quality
 
     def get_stream_name(self):
         return self.name
 
+    def get_stream_url(self):
+        return self.url
+
+    def get_stream_quality(self):
+        return self.quality
+
     def get_stream_uri(self):
         stream = CbApi()
-        stream_uri_dictionary = stream.get_stream_info(self.get_stream_url())
-        return stream_uri_dictionary['url']
+        stream_uri = stream.get_stream_uri(self.get_stream_url(), self.get_stream_quality())
+        return stream_uri
 
     def get_stream_info(self):
         stream = CbApi()

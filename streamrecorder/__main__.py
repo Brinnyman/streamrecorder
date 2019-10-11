@@ -1,4 +1,6 @@
 import argparse
+import configparser
+import os
 import sys
 import asyncio
 import selectors
@@ -6,13 +8,16 @@ from streamrecorder import Streamrecorder
 
 
 def main(args):
-    sr = Streamrecorder()
-    sr.stream_name = args.stream_name
-    sr.stream_id = args.stream_id
-    sr.recording_path = args.path
-    sr.stream_type = args.stream_type
-    sr.quality = args.stream_quality
-    sr.enable_contactsheet = args.enable_contactsheet
+    config = configparser.ConfigParser()
+    config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), './config.ini'))
+    stream_name = args.stream_name or ''
+    stream_id = args.stream_id or ''
+    recording_path = args.path or config['SETUP']['RECORDING_PATH']
+    stream_type = args.stream_type or ''
+    quality = args.stream_quality or ''
+    enable_contactsheet = args.enable_contactsheet or None
+    
+    sr = Streamrecorder(stream_name, stream_id, stream_type, quality, recording_path, enable_contactsheet)
 
     if sys.platform == 'win32':
         loop = asyncio.ProactorEventLoop()
@@ -32,14 +37,14 @@ def main(args):
 
 if __name__ == "__main__":
     my_parser = argparse.ArgumentParser(prog='streamrecorder', description='Record a stream', allow_abbrev=False)
-    my_parser.add_argument('-n', '--name', metavar='name', dest='stream_name', type=str, required=True,
+    my_parser.add_argument('-n', metavar='name', dest='stream_name', type=str,
                            help='stream name')
-    my_parser.add_argument('-t', '--type', metavar='type', dest='stream_type', type=str, required=True,
+    my_parser.add_argument('-t', dest='stream_type', type=str, choices=['stream', 'vod', 'cb'],
                            help='stream type')
-    my_parser.add_argument('-i', '--id', metavar='id', dest='stream_id', type=str, help='Twitch stream identification')
-    my_parser.add_argument('-p', '--path', metavar='path', dest='path', type=str, help='recording path')
-    my_parser.add_argument('-q', '--quality', metavar='quality', dest='stream_quality', type=str, help='stream quality')
-    my_parser.add_argument('-c', '--contact', dest='enable_contactsheet', action='store_false',
+    my_parser.add_argument('-i', metavar='id', dest='stream_id', type=str, help='Twitch stream identification')
+    my_parser.add_argument('-p', metavar='path', dest='path', type=str, help='recording path')
+    my_parser.add_argument('-q', metavar='quality', dest='stream_quality', type=str, help='stream quality')
+    my_parser.add_argument('-c', dest='enable_contactsheet', action='store_false',
                            help='disable contactsheet generation')
     args = my_parser.parse_args()
     main(args)

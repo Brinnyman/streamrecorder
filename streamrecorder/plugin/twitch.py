@@ -39,6 +39,14 @@ class TwitchApi:
         m3u8_obj = m3u8.loads(r.text)
         return m3u8_obj
 
+    def get_stream_uri(self, stream_id, quality):
+        stream_uri_dictionary = self.get_stream(stream_id)
+        get_stream_uris = {}
+        for p in stream_uri_dictionary.playlists:
+            get_stream_uris[p.media[0].name] = p.uri
+        uri = [val for key, val in get_stream_uris.items() if quality in key]
+        return uri[0]
+
     def get_stream_info(self, stream_id):
         url = self.twitch_api_url.format(stream_id=stream_id)
         r = requests.get(url, headers={"Client-ID": self.twitch_client_id})
@@ -68,12 +76,8 @@ class TwitchStream:
     def get_stream_uri(self):
         stream = TwitchApi()
         stream.set_tokens(self.get_stream_type())
-        stream_uri_dictionary = stream.get_stream(self.get_stream_id())
-        get_stream_uris = {}
-        for p in stream_uri_dictionary.playlists:
-            get_stream_uris[p.media[0].name] = p.uri
-        uri = [val for key, val in get_stream_uris.items() if self.get_stream_quality() in key]
-        return uri[0]
+        stream_uri = stream.get_stream_uri(self.get_stream_id(), self.get_stream_quality())
+        return stream_uri
 
     def get_stream_info(self):
         stream = TwitchApi()

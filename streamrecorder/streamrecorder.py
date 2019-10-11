@@ -5,15 +5,15 @@ from recorder.recorder import Recorder
 
 
 class Streamrecorder:
-    def __init__(self):
-        self.stream_name = ''
-        self.stream_id = ''
-        self.stream_type = ''
-        self.quality = ''
-        self.recording_path = ''
-        self.enable_contactsheet = None
+    def __init__(self, stream_name, stream_id, stream_type, quality, recording_path, enable_contactsheet):
+        self.stream_name = stream_name
+        self.stream_id = stream_id
+        self.stream_type = stream_type
+        self.quality = quality
+        self.recording_path = recording_path
+        self.enable_contactsheet = enable_contactsheet
 
-    async def run(self):
+    async def run(self):        
         title = " ____  _                            ____                        _           \n"
         title += "/ ___|| |_ _ __ ___  __ _ _ __ ___ |  _ \ ___  ___ ___  _ __ __| | ___ _ __ \n"
         title += "\___ \| __| '__/ _ \/ _` | '_ ` _ \| |_) / _ \/ __/ _ \| '__/ _` |/ _ \ '__|\n"
@@ -41,7 +41,7 @@ class Streamrecorder:
             await asyncio.gather(recorder.record(self.recording_path, channel, self.enable_contactsheet))
         elif self.stream_type == 'cb':
             while True:
-                cb = CbStream(self.stream_name)
+                cb = CbStream(self.stream_name, self.quality)
                 status = cb.get_stream_status()
                 print(status)
                 if status == 'public':
