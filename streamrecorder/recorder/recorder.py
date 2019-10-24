@@ -1,62 +1,35 @@
-import subprocess
-import sys
-import time
+import asyncio
+import configparser
+import os
 import datetime
 from helpers.filesystem import Filesystem
 from helpers.contactsheet import ContactSheet
-from twitch.api import TwitchAPI
-
-twitch_api = TwitchAPI()
-filesystem = Filesystem()
-contactsheet = ContactSheet()
 
 
 class Recorder:
-    # TODO: make quality optional because of vod recordings?
-    # TODO: make the functions more generic? 
-    def recorder(self, streamlink_path, url, streamlink_quality, ffmpeg_path, recorded_file):
-        process = None
-        try:
-            print('Recording in session.')
+    def __init__(self):
+        config = configparser.ConfigParser()
+        config.read(
+            os.path.join(os.path.abspath(os.path.dirname(__file__)), "../config.ini")
+        )
+        self.ffmpeg_path = config["FFMPEG"]["FFMPEG_PATH"]
 
-            streamlink = [streamlink_path, url, streamlink_quality, '--stdout', '--twitch-disable-hosting',
-                          '--twitch-disable-ads']
-            process = subprocess.Popen(streamlink, stdout=subprocess.PIPE, stderr=None)
+    async def record(self, recording_path, channel, enable_contactsheet):
+        f = Filesystem(recording_path, channel.channel)
+        f.create_directory()
+        filename = f.create_file(channel.recorded_at)
+        ffmpeg = "{} -i {} -c copy {}.mkv".format(
+            self.ffmpeg_path, channel._get_streams(), filename
+        )
+        proc = await asyncio.create_subprocess_shell(
+            ffmpeg, stdout=asyncio.subprocess.PIPE
+        )
 
-            ffmpeg = [ffmpeg_path, '-err_detect', 'ignore_err', '-i', 'pipe:0', '-c', 'copy', recorded_file + '.mp4',
-                      '-loglevel', 'quiet']
-            process2 = subprocess.Popen(ffmpeg, stdin=process.stdout, stdout=subprocess.PIPE, stderr=None)
+        await proc.wait()
 
-            print('start streamlink')
-            process.stdout.close()
-            print('start ffmpeg')
-            process2.communicate()
-            print('Recording is done.')
+        if enable_contactsheet:
+            contactsheet = ContactSheet()
+            contactsheet.create_contact_sheet(filename)
 
-        except OSError:
-            print(
-                'An error has occurred while trying to use livestreamer package. Is it installed? Do you have Python in your PATH variable?')
-            sys.exit(1)
-        except KeyboardInterrupt:
-            print('Processes are being terminated')
-            process.wait()
-            process2.wait()
-            contactsheet.create_contact_sheet(recorded_file)
-            sys.exit(1)
-
-        return process2.stdout
-
-    def record(self, streamlink_path, url, streamlink_quality, ffmpeg_path, recording_path, name):
-        filesystem.create_directory(recording_path, name)
-        recorded_file = filesystem.create_file(name, datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss"))
-        self.recorder(streamlink_path, url, streamlink_quality, ffmpeg_path, recorded_file)
-        contactsheet.create_contact_sheet(recorded_file)
-
-    def record_twitch_vod(self, streamlink_path, vod_id, twitch_client_id, streamlink_quality, ffmpeg_path,
-                          recording_path, name):
-        filesystem.create_directory(recording_path, name)
-        info = twitch_api.get_vod_information(vod_id, twitch_client_id)
-        recorded_file = filesystem.create_file(info['channel']['name'], info['published_at'])
-        url = 'twitch.tv/videos/' + vod_id
-        self.recorder(streamlink_path, url, streamlink_quality, ffmpeg_path, recorded_file)
-        contactsheet.create_contact_sheet(recorded_file)
+# TODO KeyboardInterrupt
+# TODO Check if 3rd-party programs are installed

@@ -1,80 +1,74 @@
-import os
-import configparser
-import time
-from twitch.api import TwitchAPI
+import asyncio
+from plugin.twitch import TwitchStream
+from plugin.cb import CbStream
 from recorder.recorder import Recorder
-from player.player import Player
-from helpers.filesystem import Filesystem
-from helpers.contactsheet import ContactSheet
-
-twitch_api = TwitchAPI()
-r = Recorder()
-p = Player()
-f = Filesystem()
-cs = ContactSheet()
 
 
-class StreamRecorder:
-    def __init__(self):
-        config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'config.ini'))
-        self.name = config['SETUP']['NAME']
-        self.url = config['SETUP']['URL']
-        self.recording_path = config['SETUP']['RECORDING_PATH']
-        self.type = ''
-        self.streamlink_path = config['STREAMLINK']['STREAMLINK_PATH']
-        self.streamlink_quality = config['STREAMLINK']['STREAMLINK_QUALITY']
-        self.ffmpeg_path = config['FFMPEG']['FFMPEG_PATH']
-        self.twitch_client_id = config['TWITCH']['TWITCH_CLIENT_ID']
-        self.vod_id = ''
-        self.contact_sheet_extension = config['VCSI']['CONTACT_SHEET_EXTENSION']
+class Streamrecorder:
+    def __init__(self, url, quality, recording_path, stream_type, enable_contactsheet):
+        self.url = url
+        self.stream_type = stream_type
+        self.quality = quality
+        self.recording_path = recording_path
+        self.enable_contactsheet = enable_contactsheet
 
-    def twitch_stream_info(self):
-        print(twitch_api.get_stream_information(self.name, self.twitch_client_id))
-
-    def run(self):
+    async def run(self):
         title = " ____  _                            ____                        _           \n"
         title += "/ ___|| |_ _ __ ___  __ _ _ __ ___ |  _ \ ___  ___ ___  _ __ __| | ___ _ __ \n"
         title += "\___ \| __| '__/ _ \/ _` | '_ ` _ \| |_) / _ \/ __/ _ \| '__/ _` |/ _ \ '__|\n"
         title += " ___) | |_| | |  __/ (_| | | | | | |  _ <  __/ (_| (_) | | | (_| |  __/ |\n"
         title += "|____/ \__|_|  \___|\__,_|_| |_| |_|_| \_\___|\___\___/|_|  \__,_|\___|_|\n"
-        title += '\n'
-        start = 'Starting streamrecorder'
+        title += "\n"
+        start = "Starting streamrecorder"
         print(title)
+        print(start)
 
-        if self.type == 'twitch':
-            print(start)
-            while True:
-                status = twitch_api.get_stream_status(self.name, self.twitch_client_id)
-                if status == 1:
-                    print(self.name, "online.")
-                    self.url = 'twitch.tv/' + self.name
-                    r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path,
-                             self.recording_path, self.name)
-                time.sleep(15)
-        elif self.type == 'vod':
-            print(start)
-            r.record_twitch_vod(self.streamlink_path, self.vod_id, self.twitch_client_id, self.streamlink_quality,
-                                self.ffmpeg_path, self.recording_path, self.name)
-        elif self.type == 'stream':
-            print(start)
-            while True:
-                r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path,
-                         self.name)
-                time.sleep(15)
-        elif self.type == 'record':
-            print(start)
-            r.record(self.streamlink_path, self.url, self.streamlink_quality, self.ffmpeg_path, self.recording_path,
-                     self.name)
-        elif self.type == 'play':
-            print(start)
-            while True:
-                p.play(self.streamlink_path, self.url, self.streamlink_quality)
-                time.sleep(15)
-        elif self.type == 'contact':
-            print(start)
-            cs.bulk_contact_sheet(f.filtered_files(self.recording_path, self.contact_sheet_extension))
+        if self.stream_type == "twitch":
+            channel = TwitchStream(self.url)
+            channel.quality = self.quality
+            if channel._get_streams():
+                if channel.stream_type == "live":
+                    while True:
+                        print("{} is live".format(channel.channel))
+                        recorder = Recorder()
+                        await asyncio.gather(
+                            recorder.record(
+                                self.recording_path, channel, self.enable_contactsheet
+                            )
+                        )
+                        await asyncio.sleep(15)
+                elif channel.stream_type == "video":
+                    print("{} is available".format(channel.channel))
+                    recorder = Recorder()
+                    await asyncio.gather(
+                        recorder.record(
+                            self.recording_path, channel, self.enable_contactsheet
+                        )
+                    )
+            else:
+                print(
+                    "{} is offline or hosting another channel".format(channel.channel)
+                )
+                await asyncio.sleep(15)
 
-        else:
-            print(start)
-            p.play(self.streamlink_path, self.url, self.streamlink_quality)
+        elif self.stream_type == "cb":
+            channel = CbStream(self.url)
+            channel.quality = self.quality
+            if channel._get_streams():
+                while True:
+                    print("{} is live".format(channel.channel))
+                    recorder = Recorder()
+                    await asyncio.gather(
+                        recorder.record(
+                            self.recording_path, channel, self.enable_contactsheet
+                        )
+                    )
+            else:
+                print(
+                    "{} is offline or hosting another channel".format(
+                        channel.channel
+                    )
+                )
+                await asyncio.sleep(15)
+
+# TODO returning an object from _get_streams with type, uri, name, date also removes the need to separate the twitch live and video streams

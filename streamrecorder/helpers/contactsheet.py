@@ -1,15 +1,21 @@
+import configparser
+import os
 import subprocess
 import sys
 
 
 class ContactSheet:
-    def create_contact_sheet(self, recorded_file, *args):
+    def __init__(self):
+        config = configparser.ConfigParser()
+        config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../config.ini'))
+        self.contact_sheet_extension = config['VCSI']['CONTACT_SHEET_EXTENSION']
+
+    def create_contact_sheet(self, recorded_file):
         process = None
         try:
-            vcsi = ['vcsi', recorded_file + '.mp4', '-t', '-w', '850', '-g', ' 3x5', '-o', recorded_file + '.png']
+            vcsi = [self.contact_sheet_extension, recorded_file + '.mkv', '-t', '-w', '850', '-g', ' 3x5', '-o',
+                    recorded_file + '.png']
             process = subprocess.Popen(vcsi, stdout=subprocess.PIPE, stderr=None)
-
-            print('start vcsi')
             process.communicate()
 
         except OSError:
@@ -18,8 +24,3 @@ class ContactSheet:
             sys.exit(1)
 
         return process.stdout
-
-    def bulk_contact_sheet(self, files):
-        for f in files:
-            print(f)
-            self.create_contact_sheet(f)
