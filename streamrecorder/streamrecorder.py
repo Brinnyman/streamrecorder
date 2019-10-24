@@ -5,48 +5,70 @@ from recorder.recorder import Recorder
 
 
 class Streamrecorder:
-    def __init__(self, stream_name, stream_id, stream_type, quality, recording_path, enable_contactsheet):
-        self.stream_name = stream_name
-        self.stream_id = stream_id
+    def __init__(self, url, quality, recording_path, stream_type, enable_contactsheet):
+        self.url = url
         self.stream_type = stream_type
         self.quality = quality
         self.recording_path = recording_path
         self.enable_contactsheet = enable_contactsheet
 
-    async def run(self):        
+    async def run(self):
         title = " ____  _                            ____                        _           \n"
         title += "/ ___|| |_ _ __ ___  __ _ _ __ ___ |  _ \ ___  ___ ___  _ __ __| | ___ _ __ \n"
         title += "\___ \| __| '__/ _ \/ _` | '_ ` _ \| |_) / _ \/ __/ _ \| '__/ _` |/ _ \ '__|\n"
         title += " ___) | |_| | |  __/ (_| | | | | | |  _ <  __/ (_| (_) | | | (_| |  __/ |\n"
         title += "|____/ \__|_|  \___|\__,_|_| |_| |_|_| \_\___|\___\___/|_|  \__,_|\___|_|\n"
-        title += '\n'
-        start = 'Starting streamrecorder'
+        title += "\n"
+        start = "Starting streamrecorder"
         print(title)
         print(start)
 
-        if self.stream_type == 'stream':
-            while True:
-                channel = TwitchStream(self.stream_id, self.stream_name, self.stream_type, self.quality)
-                status = channel.get_stream_status()
-                if status == 'live':
-                    print(status)
+        if self.stream_type == "twitch":
+            channel = TwitchStream(self.url)
+            channel.quality = self.quality
+            if channel._get_streams():
+                if channel.stream_type == "live":
+                    while True:
+                        print("{} is live".format(channel.channel))
+                        recorder = Recorder()
+                        await asyncio.gather(
+                            recorder.record(
+                                self.recording_path, channel, self.enable_contactsheet
+                            )
+                        )
+                        await asyncio.sleep(15)
+                elif channel.stream_type == "video":
+                    print("{} is available".format(channel.channel))
                     recorder = Recorder()
-                    await asyncio.gather(recorder.record(self.recording_path, channel, self.enable_contactsheet))
-                elif status == 'offline':
-                    print(status)
-                    await asyncio.sleep(15)
-        elif self.stream_type == 'vod':
-            channel = TwitchStream(self.stream_id, self.stream_name, self.stream_type, self.quality)
-            recorder = Recorder()
-            await asyncio.gather(recorder.record(self.recording_path, channel, self.enable_contactsheet))
-        elif self.stream_type == 'cb':
-            while True:
-                cb = CbStream(self.stream_name, self.quality)
-                status = cb.get_stream_status()
-                if status == 'public':
-                    print(status)
+                    await asyncio.gather(
+                        recorder.record(
+                            self.recording_path, channel, self.enable_contactsheet
+                        )
+                    )
+            else:
+                print(
+                    "{} is offline or hosting another channel".format(channel.channel)
+                )
+                await asyncio.sleep(15)
+
+        elif self.stream_type == "cb":
+            channel = CbStream(self.url)
+            channel.quality = self.quality
+            if channel._get_streams():
+                while True:
+                    print("{} is live".format(channel.channel))
                     recorder = Recorder()
-                    await asyncio.gather(recorder.record(self.recording_path, cb, self.enable_contactsheet))
-                elif status == 'offline':
-                    print(status)
-                    await asyncio.sleep(15)
+                    await asyncio.gather(
+                        recorder.record(
+                            self.recording_path, channel, self.enable_contactsheet
+                        )
+                    )
+            else:
+                print(
+                    "{} is offline or hosting another channel".format(
+                        channel.channel
+                    )
+                )
+                await asyncio.sleep(15)
+
+# TODO returning an object from _get_streams with type, uri, name, date also removes the need to separate the twitch live and video streams
