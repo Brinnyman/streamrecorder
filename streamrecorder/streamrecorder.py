@@ -38,14 +38,8 @@ class Streamrecorder:
                         name = channel.channel  + '_' + channel.recorded_at
                         filename = f.create_file(name, 'mkv')
                     
-                        recording = {
-                            "uri": channel._get_streams(),
-                            "output": filename,
-                            "enable_contactsheet": self.enable_contactsheet
-                        }
-
-                        recorder = Recorder(self.ffmpeg_path, self.vcsi_path, recording)
-                        await asyncio.gather(recorder.record())
+                        recorder = Recorder(self.ffmpeg_path, self.vcsi_path)
+                        await asyncio.gather(recorder.record(channel._get_streams(), filename, self.enable_contactsheet))
                         await asyncio.sleep(15)
                 elif channel.stream_type == "video":
                     print("{} is available".format(channel.channel))
@@ -54,13 +48,8 @@ class Streamrecorder:
                     name = channel.channel  + '_' + channel.recorded_at
                     filename = f.create_file(name, 'mkv')
                    
-                    recording = {
-                        "uri": channel._get_streams(),
-                        "output": filename,
-                        "enable_contactsheet": self.enable_contactsheet
-                    }
-                    recorder = Recorder(self.ffmpeg_path, self.vcsi_path, recording)
-                    await asyncio.gather(recorder.record())
+                    recorder = Recorder(self.ffmpeg_path, self.vcsi_path)
+                    await asyncio.gather(recorder.record(channel._get_streams(), filename, self.enable_contactsheet))
             else:
                 print(
                     "{} is offline or hosting another channel".format(channel.channel)
@@ -77,20 +66,12 @@ class Streamrecorder:
                     f.create_directory(self.recording_path, channel.channel)
                     name = channel.channel  + '_' + channel.recorded_at
                     filename = f.create_file(name, 'mkv')
-                   
-                    recording = {
-                        "uri": channel._get_streams(),
-                        "output": filename,
-                        "enable_contactsheet": self.enable_contactsheet
-                    }
-
-                    recorder = Recorder(self.ffmpeg_path, self.vcsi_path, recording)
-                    await asyncio.gather(recorder.record())
+                    recorder = Recorder(self.ffmpeg_path, self.vcsi_path)
+                    await asyncio.gather(recorder.record(channel._get_streams(), filename, self.enable_contactsheet))
+                    await asyncio.sleep(15)
             else:
                 print(
-                    "{} is offline or hosting another channel".format(
-                        channel.channel
-                    )
+                    "{} is offline or hosting another channel".format(channel.channel)
                 )
                 await asyncio.sleep(15)
 
