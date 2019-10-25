@@ -3,6 +3,7 @@ from plugin.twitch import TwitchStream
 from plugin.cb import CbStream
 from helpers.recorder import Recorder
 from helpers.filesystem import Filesystem
+from helpers.contactsheet import ContactSheet
 
 
 class Streamrecorder:
@@ -49,13 +50,19 @@ class Streamrecorder:
                 if stream['stream_type'] == 'live':
                     while True:
                         print("{} is available".format(stream['channel']))
-                        recorder = Recorder(self.ffmpeg_path, self.vcsi_path)
-                        await asyncio.gather(recorder.record(stream['uri'], stream['filepath'], self.enable_contactsheet))
+                        recorder = Recorder(self.ffmpeg_path)
+                        await asyncio.gather(recorder.record(stream['uri'], stream['filepath']))
+                        if self.enable_contactsheet:
+                            cs = ContactSheet(self.vcsi_path)
+                            cs.create_contact_sheet(stream['filepath'])
                         await asyncio.sleep(15)
                 elif stream['stream_type'] == 'video':
                     print("{} is available".format(stream['channel']))
-                    recorder = Recorder(self.ffmpeg_path, self.vcsi_path)
-                    await asyncio.gather(recorder.record(stream['uri'], stream['filepath'], self.enable_contactsheet))
+                    recorder = Recorder(self.ffmpeg_path)
+                    await asyncio.gather(recorder.record(stream['uri'], stream['filepath']))
+                    if self.enable_contactsheet:
+                        cs = ContactSheet(self.vcsi_path)
+                        cs.create_contact_sheet(stream['filepath'])
             else:
                 print("{} is offline or hosting another channel".format(stream['channel']))
                 await asyncio.sleep(15)
@@ -66,8 +73,11 @@ class Streamrecorder:
             if stream['uri']:
                 while True:
                     print("{} is available".format(stream['channel']))
-                    recorder = Recorder(self.ffmpeg_path, self.vcsi_path)
-                    await asyncio.gather(recorder.record(stream['uri'], stream['filepath'], self.enable_contactsheet))
+                    recorder = Recorder(self.ffmpeg_path)
+                    await asyncio.gather(recorder.record(stream['uri'], stream['filepath']))
+                    if self.enable_contactsheet:
+                        cs = ContactSheet(self.vcsi_path)
+                        cs.create_contact_sheet(stream['filepath'])
                     await asyncio.sleep(15)
             else:
                 print("{} is offline".format(stream['channel']))
