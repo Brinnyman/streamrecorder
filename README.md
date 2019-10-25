@@ -18,7 +18,7 @@ TWITCH_CLIENT_ID = twitch client id
 FFMPEG_PATH = command or path to where ffmpeg is installed.
 
 [VCSI]
-CONTACT_SHEET_EXTENSION = command or path to where vcsi is installed.
+VCSI_PATH = command or path to where vcsi is installed.
 ```
 
 ## Usage

@@ -15,6 +15,22 @@ class Streamrecorder:
         self.ffmpeg_path = ffmpeg_path
         self.vcsi_path = vcsi_path
 
+    def prepare_stream(self, stream):
+        f = Filesystem()
+        uri = stream._get_streams()
+
+        f.create_directory(self.recording_path, stream.channel)
+        f.create_file((stream.channel  + '_' + stream.recorded_at), 'mkv')
+        filepath = f.create_filepath(f.get_directory(), f.get_filename())
+
+        stream = {
+            'stream_type': stream.stream_type,
+            'channel': stream.channel,
+            'uri': uri,
+            'filepath': filepath
+        }
+        return stream
+
     async def run(self):
         title = " ____  _                            ____                        _           \n"
         title += "/ ___|| |_ _ __ ___  __ _ _ __ ___ |  _ \ ___  ___ ___  _ __ __| | ___ _ __ \n"
@@ -27,52 +43,33 @@ class Streamrecorder:
         print(start)
 
         if self.stream_type == "twitch":
-            channel = TwitchStream(self.url)
-            channel.quality = self.quality
-            if channel._get_streams():
-                if channel.stream_type == "live":
+            twitch = TwitchStream(self.url, self.quality)
+            stream = self.prepare_stream(twitch)
+            if stream['uri']:
+                if stream['stream_type'] == 'live':
                     while True:
-                        print("{} is live".format(channel.channel))
-                        f = Filesystem()
-                        f.create_directory(self.recording_path, channel.channel)
-                        name = channel.channel  + '_' + channel.recorded_at
-                        filename = f.create_file(name, 'mkv')
-                    
+                        print("{} is available".format(stream['channel']))
                         recorder = Recorder(self.ffmpeg_path, self.vcsi_path)
-                        await asyncio.gather(recorder.record(channel._get_streams(), filename, self.enable_contactsheet))
+                        await asyncio.gather(recorder.record(stream['uri'], stream['filepath'], self.enable_contactsheet))
                         await asyncio.sleep(15)
-                elif channel.stream_type == "video":
-                    print("{} is available".format(channel.channel))
-                    f = Filesystem()
-                    f.create_directory(self.recording_path, channel.channel)
-                    name = channel.channel  + '_' + channel.recorded_at
-                    filename = f.create_file(name, 'mkv')
-                   
+                elif stream['stream_type'] == 'video':
+                    print("{} is available".format(stream['channel']))
                     recorder = Recorder(self.ffmpeg_path, self.vcsi_path)
-                    await asyncio.gather(recorder.record(channel._get_streams(), filename, self.enable_contactsheet))
+                    await asyncio.gather(recorder.record(stream['uri'], stream['filepath'], self.enable_contactsheet))
             else:
-                print(
-                    "{} is offline or hosting another channel".format(channel.channel)
-                )
+                print("{} is offline or hosting another channel".format(stream['channel']))
                 await asyncio.sleep(15)
 
         elif self.stream_type == "cb":
-            channel = CbStream(self.url)
-            channel.quality = self.quality
-            if channel._get_streams():
+            cb = CbStream(self.url, self.quality)
+            stream = self.prepare_stream(cb)
+            if stream['uri']:
                 while True:
-                    print("{} is live".format(channel.channel))
-                    f = Filesystem()
-                    f.create_directory(self.recording_path, channel.channel)
-                    name = channel.channel  + '_' + channel.recorded_at
-                    filename = f.create_file(name, 'mkv')
+                    print("{} is available".format(stream['channel']))
                     recorder = Recorder(self.ffmpeg_path, self.vcsi_path)
-                    await asyncio.gather(recorder.record(channel._get_streams(), filename, self.enable_contactsheet))
+                    await asyncio.gather(recorder.record(stream['uri'], stream['filepath'], self.enable_contactsheet))
                     await asyncio.sleep(15)
             else:
-                print(
-                    "{} is offline or hosting another channel".format(channel.channel)
-                )
+                print("{} is offline".format(stream['channel']))
                 await asyncio.sleep(15)
-
-# TODO returning an object from _get_streams with type, uri, name, date also removes the need to separate the twitch live and video streams
+                

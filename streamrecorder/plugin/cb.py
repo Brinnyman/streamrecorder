@@ -31,13 +31,13 @@ class CbAPI:
 
 
 class CbStream:
-    def __init__(self, stream_url):
+    def __init__(self, stream_url, quality):
         self.stream_url = stream_url
         match = _url_re.match(self.stream_url).groupdict()
         parsed = urlparse(self.stream_url)
         self._channel = None
         self._channel = match.get("username") and match.get("username").lower()
-        self.quality = ""
+        self.quality = quality
         self.api = CbAPI()
 
     @property

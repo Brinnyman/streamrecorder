@@ -84,7 +84,7 @@ class TwitchAPI:
 
 
 class TwitchStream:
-    def __init__(self, stream_url):
+    def __init__(self, stream_url, quality):
         self.stream_url = stream_url
         match = _url_re.match(self.stream_url).groupdict()
         parsed = urlparse(self.stream_url)
@@ -95,7 +95,7 @@ class TwitchStream:
         self._channel = None
         self.stream_type = ""
         self.recorded_at = datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss")
-        self.quality = ""
+        self.quality = quality
         self.config = configparser.ConfigParser()
         self.config.read(
             os.path.join(os.path.abspath(os.path.dirname(__file__)), "../config.ini")
@@ -148,7 +148,7 @@ class TwitchStream:
                 get_stream_uris[p.media[0].name] = p.uri
             final_sorted_streams = self._final_sorted_streams(get_stream_uris)
             uri = [val for key, val in final_sorted_streams.items() if quality in key]
-            print('hls stream uri: ', uri[0])
+            # print('hls stream uri: ', uri[0])
             return uri[0]
 
     def _final_sorted_streams(self, uris):
@@ -203,4 +203,3 @@ class TwitchStream:
             return self._get_hls_streams(self.stream_type)
 
 # TODO AttributeError: 'NoneType' object has no attribute 'groupdict'
-# TODO Double request, channel._get_streams(), create an object with the stream results[name, date, uri]
