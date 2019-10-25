@@ -1,20 +1,17 @@
-import configparser
-import os
 import subprocess
 import sys
+import os
 
 
 class ContactSheet:
-    def __init__(self):
-        config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../config.ini'))
-        self.contact_sheet_extension = config['VCSI']['CONTACT_SHEET_EXTENSION']
+    def __init__(self, vcsi_path):
+        self.vcsi_path = vcsi_path
 
-    def create_contact_sheet(self, recorded_file):
+    def create_contact_sheet(self, filename):
         process = None
         try:
-            vcsi = [self.contact_sheet_extension, recorded_file + '.mkv', '-t', '-w', '850', '-g', ' 3x5', '-o',
-                    recorded_file + '.png']
+            name =  os.path.splitext(filename)[0]
+            vcsi = [self.vcsi_path, filename, '-t', '-w', '850', '-g', ' 3x5', '-o', name + '.png']
             process = subprocess.Popen(vcsi, stdout=subprocess.PIPE, stderr=None)
             process.communicate()
 

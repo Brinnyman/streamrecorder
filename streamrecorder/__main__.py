@@ -17,7 +17,9 @@ def main(args):
     quality = args.quality or ""
     stream_type = args.stream_type or ""
     enable_contactsheet = args.enable_contactsheet or None
-    sr = Streamrecorder(url, quality, recording_path, stream_type, enable_contactsheet)
+    ffmpeg_path = config["FFMPEG"]["FFMPEG_PATH"]
+    vcsi_path = config['VCSI']['VCSI_PATH']
+    sr = Streamrecorder(url, quality, recording_path, stream_type, enable_contactsheet, ffmpeg_path, vcsi_path)
 
     if sys.platform == "win32":
         loop = asyncio.ProactorEventLoop()
