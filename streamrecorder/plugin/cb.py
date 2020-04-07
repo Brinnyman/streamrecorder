@@ -4,6 +4,7 @@ import requests
 import m3u8
 from collections import OrderedDict
 from urllib.parse import urlparse
+import datetime
 
 _url_re = re.compile(r"https?://(\w+\.)?chaturbate\.com/(?P<username>\w+)")
 
@@ -37,6 +38,8 @@ class CbStream:
         parsed = urlparse(self.stream_url)
         self._channel = None
         self._channel = match.get("username") and match.get("username").lower()
+        self.stream_type = ""
+        self.recorded_at = datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss")
         self.quality = quality
         self.api = CbAPI()
 
